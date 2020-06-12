@@ -177,7 +177,8 @@ def iterate_dir(data_to_filter_func, files_dir, filter_func, start_file):
 
 def get_crack_alphas(files_dir):
     def filter_relevant_files(file_name):
-        return filter_by_prefix(file_name, 'hole') or file_name == '280_no_block.mca'
+        return filter_by_prefix(file_name, 'hole') or file_name == \
+               'no_block_470mm_19092020_sameButLonger.mca' or file_name == 'absorbtion_3brick.mca'
 
 
     alpha_dict = process_some_files(filter_relevant_files, files_dir, arr_to_crack_N)
@@ -218,7 +219,7 @@ def get_distance_power(files_dir):
 if __name__ == '__main__':
     files_dir = 'מדידות'
 
-    get_distance_power(files_dir)
-    # get_crack_alphas(files_dir)
-    # observe_file(files_dir + '/hole_16on13mm.mca')
+    # get_distance_power(files_dir)
+    get_crack_alphas(files_dir)
+    # observe_file(files_dir + '/hole_3on5mm.mca')
     # main(files_dir)
