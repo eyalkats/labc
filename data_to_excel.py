@@ -59,8 +59,13 @@ def y_to_N(y, x_min, x_max):
     return np.sum(y[x_min:x_max])
 
 
-def arr_to_crack_N(arr):
-    return y_to_N(arr, CS_PHOTOPEAK_MIN_BIN, CS_PHOTOPEAK_MAX_BIN)
+def arr_to_crack_N(arr, live_time):
+    N = y_to_N(arr, CS_PHOTOPEAK_MIN_BIN, CS_PHOTOPEAK_MAX_BIN)
+    N_normalized = N / live_time
+    print(f"N:{N_normalized} | Error:", photons_count_errors(arr, live_time,
+                                                             CS_PHOTOPEAK_MIN_BIN,
+                                                             CS_PHOTOPEAK_MAX_BIN))
+    return N_normalized
 
 
 def extract_live_time(data_str):
@@ -90,6 +95,10 @@ def get_peak_idx(arr):
     return np.min(peak_idxs), np.max(peak_idxs)
 
 
+def photons_count_errors(arr, live_time, min_bin, max_bin):
+    return np.sum(np.sqrt(arr)[min_bin: max_bin]) / live_time
+
+
 def process_some_files(filter_func, files_dir, process_func,
                        process_name_func=lambda x: x):
     """
@@ -107,7 +116,7 @@ def process_some_files(filter_func, files_dir, process_func,
             if filter_func(filename):
                 arr, additional_data = mca_to_numpy(files_dir + '/' + filename)
 
-                result_dict[process_name_func(filename)] = process_func(arr /
+                result_dict[process_name_func(filename)] = process_func(arr,
                                                                         extract_live_time(
                                                                             additional_data))
 
@@ -178,7 +187,8 @@ def iterate_dir(data_to_filter_func, files_dir, filter_func, start_file):
 def get_crack_alphas(files_dir):
     def filter_relevant_files(file_name):
         return filter_by_prefix(file_name, 'hole') or file_name == \
-               'no_block_470mm_19092020_sameButLonger.mca' or file_name == 'absorbtion_3brick.mca'
+               'no_block_470mm_19092020_sameButLonger.mca' or file_name == \
+               'absorbtion_3brick.mca'
 
 
     alpha_dict = process_some_files(filter_relevant_files, files_dir, arr_to_crack_N)
@@ -191,6 +201,7 @@ def get_crack_alphas(files_dir):
     plt.xticks(x, files_names)
     plt.plot(x, N_values)
     plt.show()
+    print("Errors: ")
 
 
 def get_distance_power(files_dir):
